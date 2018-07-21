@@ -50,7 +50,7 @@ def catchEntireParens(pattern):
             if countP == 0:
                 return i
         elif pattern[i] == '(':
-            countP += 1 
+            countP += 1
 
 def handleBrackets(toMatch, string, repeats):
     #checks if string chars match for the specified # of times
@@ -71,7 +71,8 @@ def handleParens(pattern, string, i):
         #use pattern[i+3] to skip ()* chars
         return regexV(pattern[i+3:], string) or checkRestOfString(i, pattern[1:], string, True, 2)
     elif afterParens == '+':
-        return checkRestOfString(i, pattern[1:], string, True)
+        return checkRestOfString(i, pattern[1:], string, True, 2)
+
     elif afterParens == '?':
         return regexV(pattern[i+3:], string) or checkRestOfString(i, pattern[1:], string, False, 2)
     elif afterParens == '{':
@@ -87,13 +88,13 @@ def findMinAndMaxRepeats(pattern, offset):
         #maximum repeats is specified, could be {x,y} or {x,}
         if pattern[offset+2] == '}':
             #set to -1 to indicate infinity repeats after minimum threshold
-            maximumRepeats = -1 
+            maximumRepeats = -1
             endOfBrackets = 4
         else:
             #maximum number of repeats is specified within brackets
             maximumRepeats = int(pattern[offset+2]) - minimumRepeats
             endOfBrackets = 5
-  
+
     return [minimumRepeats, maximumRepeats, endOfBrackets]
 
 
@@ -107,7 +108,7 @@ def checkRestOfString(cutoff, pattern, string, canItRepeat, endOfParens):
             if regexV(pattern[cutoff+endOfParens:], string[i:]) or \
                     (canItRepeat and checkRestOfString(cutoff, pattern, string[i:], True, endOfParens)):
                 return True
-    
+
     #Entire string has been checked for parens repeats
     return False
 
@@ -149,12 +150,11 @@ def checkRestOfStringLimit(cutoff, pattern, string, repeats):
 
 
 
-
+"""
 if __name__ == "__main__":
     with open(sys.argv[1]) as f:
         pattern = f.readline()[:-1]
         stringCheck = f.readline()[:-1]
 
         print(regexV(pattern, stringCheck))
-
-
+"""
