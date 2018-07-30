@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import axios from 'axios'
 import './App.css';
+import MatchesDisplay from './components/MatchesDisplay'
 
 class App extends Component {
   constructor(props) {
@@ -17,11 +18,8 @@ class App extends Component {
     }
     this.onChange = this.onChange.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
-    this.displayMatches = this.displayMatches.bind(this);
     this.checkRegex = this.checkRegex.bind(this);
-    this.sendStrings = this.sendStrings.bind(this);
     this.handleMatchResult = this.handleMatchResult.bind(this);
-    this.highlightString = this.highlightString.bind(this);
   }
 
   onSubmit(e) {
@@ -31,17 +29,6 @@ class App extends Component {
       matches: [],
       match: true
     }, this.checkRegex)
-  }
-
-  sendStrings(){
-    let strings = this.state.stringToMatch.split(" ")
-    for (let string of strings){
-      for(let i = 0; i < string.length; ++i){
-        for(let x = 0; x < string.length; ++x){
-          this.checkRegex(string.substr(i, x+1-i))
-        }
-      }
-    }
   }
 
   checkRegex(){
@@ -58,18 +45,19 @@ class App extends Component {
 
   handleMatchResult(foundMatches){
     const { stringToMatch } = this.state
+    const words = stringToMatch.split(' ')
     if(foundMatches.length == 0){
       this.setState({ result: false })
     }
     else{
       let matches = []
-      for (let wordRange of foundMatches){
-        for (let range of wordRange){
-          matches.push(stringToMatch.substr(range[0], range[1]-range[0]))
+      let i = 0
+      for (let wordRanges of foundMatches){
+        for (let range of wordRanges){
+          matches.push(words[i].substr(range[0], range[1]-range[0]))
+          ++i;
         }
       }
-      console.log(matches)
-
       this.setState({
         result: true,
         matches
@@ -78,40 +66,8 @@ class App extends Component {
     }
   }
 
-
-
   onChange(e) {
     this.setState({ [e.target.name]: e.target.value})
-  }
-
-  displayMatches(){
-    return <ol> {this.state.matches.map((match) =>
-        <li>{match}</li>
-      )
-    } </ol>
-  }
-
-  highlightString(str, ranges){
-    let words = str.split(" ")
-    return <div> <span>{ words.map((word, i) =>
-      <span>{this.highlightWithinWord(word, ranges[i])}</span>)}
-    </span></div>
-  }
-
-  highlightWithinWord(word, hiliRanges){
-    let rangesLength = hiliRanges.length - 1
-    return <div style={{display: 'inline'}}> { hiliRanges.map((hiliRange, i) =>
-        <span>
-            <span>
-              {i===0 ? word.substr(0, hiliRange[0]):
-                       word.substr(hiliRanges[i-1][1], hiliRange[0]-hiliRanges[i-1][1])}
-            </span>
-            <span className="highlighted">
-              {word.substr(hiliRange[0], hiliRange[1]-hiliRange[0])}
-            </span>
-        </span>
-      )
-    }{word.substr(hiliRanges[rangesLength][1], word.length-hiliRanges[rangesLength][1])}</div>
   }
 
 
@@ -156,23 +112,15 @@ class App extends Component {
           </p>
         </div>
         </form>
-        {this.state.result && <div><p>Result = {this.state.match}</p></div>}
 
-        <div className="fl w-100 pl7 pr7 pv4  w-30">
-          <div className="tc">
-            <h2>Matches Found</h2>
-          </div>
-          <div className="pv3 ba  7b--black bg-lightest-blue">
-            <div className="pl4 pr4" style={{wordWrap: 'break-word'}}>
-              {this.state.matchRanges.length != 0 && this.highlightString(this.state.stringToMatch, this.state.matchRanges)}
-            </div>
-          </div>
-          <div className="ba b--black bg-lightest-blue">
-            <div className="">
-              {this.state.match && this.displayMatches()}
-            </div>
-          </div>
-        </div>
+        {this.state.match &&
+          <MatchesDisplay
+            stringToMatch={this.state.stringToMatch}
+            match={this.state.match}
+            matchRanges={this.state.matchRanges}
+            matches={this.state.matches}
+          />
+       }
 
         <div className="fl w-50 ph4 pv5">
           <h2>Special Characters Supported</h2>

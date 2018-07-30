@@ -16,9 +16,9 @@ def startApp():
 @app.route('/findMatches', methods=["Post"])
 def findMatches():
     req = request.get_json()
-    print(req)
     pattern = req['pattern']
     stringToMatch = req['stringToMatch']
+    print(pattern, stringToMatch)
     wordsToCheck = stringToMatch.split(' ')
     result = []
     for word in wordsToCheck:
@@ -26,16 +26,17 @@ def findMatches():
         rangeList = []
         for i in range(0, len(word)):
             for x in range(i, len(word)):
-                if regex.regexV(pattern, stringToMatch[i:x+1]):
+                if regex.regexV(pattern, word[i:x+1]):
+                    print(word[i:x+1])
+                    print(i)
+                    print(x+1)
                     longestMatch = [i, x+1]
 
                 else:
                     if len(longestMatch) != 0:
-                        print(longestMatch)
                         rangeList.append(longestMatch)
                         longestMatch = []
                         i = x+1
-
 
         result.append(rangeList)
 
