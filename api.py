@@ -1,6 +1,7 @@
 from flask import Flask, request
 import flask
 import regex
+import check
 import sys
 sys.path.append('/usr/local/lib/python3.6/site-packages')
 from flask_cors import CORS
@@ -12,6 +13,14 @@ cors = CORS(app, resources={r"/*": {"origins": "*"}})
 @app.route('/')
 def startApp():
     return flask.render_template('home.html')
+
+@app.route('/checkLegalRegex', methods=["Post"])
+def checkRegex():
+    print('erer')
+    req = request.get_json()
+    patternToCheck = req['pattern']
+    result = check.checkV(patternToCheck)
+    return flask.jsonify(result=result)
 
 @app.route('/findMatches', methods=["Post"])
 def findMatches():
@@ -27,9 +36,6 @@ def findMatches():
         for i in range(0, len(word)):
             for x in range(i, len(word)):
                 if regex.regexV(pattern, word[i:x+1]):
-                    print(word[i:x+1])
-                    print(i)
-                    print(x+1)
                     longestMatch = [i, x+1]
 
                 else:

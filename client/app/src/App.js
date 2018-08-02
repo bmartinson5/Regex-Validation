@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import axios from 'axios'
 import './App.css';
 import MatchesDisplay from './components/MatchesDisplay'
+import Description from './components/description'
 
 class App extends Component {
   constructor(props) {
@@ -14,21 +15,62 @@ class App extends Component {
       match: false,
       matches: [],
       currentMatch: '',
-      matchRanges: []
+      matchRanges: [],
+      invalidRegMessage: '',
+      invalidStrMessage: '',
     }
     this.onChange = this.onChange.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
     this.checkRegex = this.checkRegex.bind(this);
     this.handleMatchResult = this.handleMatchResult.bind(this);
+    this.checkForEmptyFields = this.checkForEmptyFields.bind(this);
+    this.checkLegal = this.checkLegal.bind(this);
+  }
+
+  checkForEmptyFields(pattern, string){
+    if(pattern === ''){
+      this.setState({ invalidRegMessage: 'Pattern cant be empty'})
+    } else {
+      this.setState({ invalidRegMessage: ''})
+    }
+    if(string === ''){
+      this.setState({ invalidStrMessage: 'String cant be empty'})
+    } else {
+      this.setState({ invalidStrMessage: ''})
+    }
+    if(pattern === '' || string === '')
+      return true
+    return false
+  }
+
+  checkLegal(pattern, string){
+    axios.post('http://localhost:5000/checkLegalRegex', {
+      pattern: pattern
+    })
+      .then(res => {
+        if(res.data.result === false){
+          this.setState({ invalidRegMessage: 'Invalid regex pattern'})
+          console.log('herer fllase')
+        } else {
+          this.setState({
+            invalidRegMessage: '',
+            stringToMatch: string,
+            matches: [],
+            match: true
+          }, this.checkRegex)
+        }
+      })
   }
 
   onSubmit(e) {
     e.preventDefault()
-    this.setState({
-      stringToMatch: this.state.stringToMatchInput,
-      matches: [],
-      match: true
-    }, this.checkRegex)
+    const { pattern, stringToMatchInput } = this.state
+
+    if(this.checkForEmptyFields(pattern, stringToMatchInput) === true)
+      return
+
+    this.checkLegal(pattern, stringToMatchInput)
+
   }
 
   checkRegex(){
@@ -39,7 +81,6 @@ class App extends Component {
       .then(res => {
         this.setState({ matchRanges: res.data.result })
         this.handleMatchResult(res.data.result)
-
       })
   }
 
@@ -55,8 +96,8 @@ class App extends Component {
       for (let wordRanges of foundMatches){
         for (let range of wordRanges){
           matches.push(words[i].substr(range[0], range[1]-range[0]))
-          ++i;
         }
+        ++i;
       }
       this.setState({
         result: true,
@@ -89,6 +130,9 @@ class App extends Component {
                 onChange={this.onChange}
                 />
               </p>
+              <span style={{color: 'crimson'}}>
+                {this.state.invalidRegMessage}
+              </span>
         </div>
         <div className='tc fl w-50 pt3'>
             <h2>String to Match:</h2>
@@ -101,6 +145,9 @@ class App extends Component {
               onChange={this.onChange}
               />
           </p>
+          <span style={{color: 'crimson'}}>
+            {this.state.invalidStrMessage}
+          </span>
         </div>
         <div className="tc fl w-100">
           <p>
@@ -121,19 +168,7 @@ class App extends Component {
             matches={this.state.matches}
           />
        }
-
-        <div className="fl w-50 ph4 pv5">
-          <h2>Special Characters Supported</h2>
-          <h2>*<span>0 or more repetitions of the preceding RE</span></h2>
-          <h2>+<span>1 or more repetitions of the preceding RE</span></h2>
-          <h2>?<span>0 or 1 repetitions of the preceding RE</span></h2>
-          <h2>()<span>Matches RE within parenthesis, and indicates start and end of a group</span></h2>
-          <h2>{'{X}'}<span>Matches the preceding RE with exactly X number of repetitions</span></h2>
-          <h2>{'{X,}'}<span>Matches the preceding RE with at least X repetitions, or more</span></h2>
-          <h2>{'{X,Y}'}<span>Matches the preceding RE with at least'X repetitions but no more than Y</span></h2>
-          <p>
-          </p>
-        </div>
+       <Description />
 
       </div>
     );
