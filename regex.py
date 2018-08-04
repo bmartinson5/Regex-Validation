@@ -33,8 +33,8 @@ def regexV(pattern, string):
         elif len(pattern) >= 2 and pattern[1] == '{':
             #next char in pattern has to repeat the number of times specified by the int in the brackets
             repeats = findMinAndMaxRepeats(pattern, 2)
-            print(pattern[repeats[2]+1:], string[repeats[0]:])
-            return handleBrackets(pattern[0], string, repeats) and regexV(pattern[repeats[2]:], string[repeats[0]:])
+            return handleBrackets(pattern, string, repeats)
+            #return handleBrackets(pattern[0], string, repeats) and regexV(pattern[repeats[2]:], string[repeats[0]:])
 
         elif match:
             #Just needed next chars to match (now check rest of string)
@@ -53,16 +53,31 @@ def catchEntireParens(pattern):
         elif pattern[i] == '(':
             countP += 1
 
-def handleBrackets(toMatch, string, matchesNeeded):
+def handleBrackets(pattern, string, matchesNeeded):
     #checks if string chars match for the specified # of times
-    print(matchesNeeded)
-    if len(string) < matchesNeeded[0]:
+    toMatch = pattern[0]
+    minMatches = matchesNeeded[0]
+    maxMatches = matchesNeeded[1]
+    if len(string) < minMatches:
         return False
 
-    for i in range(matchesNeeded[0]):
-        if string[i] is not toMatch:
+    if minMatches != 0:
+        #next char must match
+        if string[0] is not toMatch:
             return False
-    return True
+        else:
+            #check next string char until minMatches == 0
+            matchesNeeded[0] -= 1
+            return handleBrackets(pattern, string[1:], matchesNeeded)
+    else:
+        if maxMatches == 0 or len(string) == 0 or string[0] is not toMatch:
+            #only choice is to move on to next pattern char
+            return regexV(pattern[matchesNeeded[2]:], string)
+        else:
+            #Subtract 1 from maxMatches, try to match again, or move on the next pattern char
+            matchesNeeded[1] -= 1
+            #if maxMatches == -1 (infinity) then it will never hit the == 0 condition
+            return regexV(pattern[matchesNeeded[2]:], string) or handleBrackets(pattern, string[1:], matchesNeeded)
 
 
 def handleParens(pattern, string, i):
@@ -82,21 +97,47 @@ def handleParens(pattern, string, i):
 
 
 def findMinAndMaxRepeats(pattern, offset):
-    minimumRepeats = int(pattern[offset])
-    maximumRepeats = 0
-    endOfBrackets = 4
-    if pattern[offset+1] == ',':
+    minimumRepeats, index = checkMinRepeats(pattern, offset)
+    maximumRepeats = checkMaxRepeats(pattern, offset, index) - minimumRepeats
+    endOfBrackets = checkEndOfBrackets(pattern, offset)
+    return [minimumRepeats, maximumRepeats, endOfBrackets]
+
+
+def checkEndOfBrackets(pattern, offset):
+    index = 3 #to include both brackets and the first char
+    while pattern[offset] != '}':
+        index += 1
+        offset += 1
+    return index
+
+def checkMaxRepeats(pattern, offset, index):
+    if pattern[index] == ',':
         #maximum repeats is specified, could be {x,y} or {x,}
-        if pattern[offset+2] == '}':
+        if pattern[index+1] == '}':
             #set to -1 to indicate infinity repeats after minimum threshold
-            maximumRepeats = -1
-            endOfBrackets = 5
+            return -1
         else:
             #maximum number of repeats is specified within brackets
-            maximumRepeats = int(pattern[offset+2]) - minimumRepeats
-            endOfBrackets = 6
+            maxR = ''
+            index += 1
+            while pattern[index] != '}':
+                maxR += pattern[index]
+                index += 1
+            return int(maxR)
+    else:
+        return 0
 
-    return [minimumRepeats, maximumRepeats, endOfBrackets]
+
+def checkMinRepeats(pattern, offset):
+    #capture whole integer in string form, and return the int form
+    minimumRepeats = pattern[offset]
+    index = offset + 1
+    while pattern[index] != ',' and pattern[index] != '}':
+        minimumRepeats += pattern[index]
+        index += 1
+
+    return (int(minimumRepeats), index)
+
 
 
 def checkRestOfString(cutoff, pattern, string, canItRepeat, endOfParens):
@@ -134,10 +175,17 @@ def checkRestOfStringLimit(cutoff, pattern, string, repeats):
                     repeats[1] -= 1
                     return regexV(pattern[cutoff+endOfBrackets:], string[i:]) or checkRestOfStringLimit(cutoff, pattern, string[i:], repeats)
 
-
             repeats[0] -= 1
             if checkRestOfStringLimit(cutoff, pattern, string[i:], repeats):
                 return True
 
     #Entire string has been checked for parens repeats and all lead to false
     return False
+
+#the following is for testing purposes
+if __name__ == "__main__":
+ with open(sys.argv[1]) as f:
+     pattern = f.readline()[:-1]
+     stringCheck = f.readline()[:-1]
+
+     print(regexV(pattern, stringCheck))

@@ -4,7 +4,6 @@ def checkV(pattern):
     charsStack = []
     patternChars = list(pattern)
     for pChar in patternChars:
-        print(pChar)
         if pChar == '(':
             charsStack.append('(')
         elif pChar == ')':

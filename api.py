@@ -16,7 +16,6 @@ def startApp():
 
 @app.route('/checkLegalRegex', methods=["Post"])
 def checkRegex():
-    print('erer')
     req = request.get_json()
     patternToCheck = req['pattern']
     result = check.checkV(patternToCheck)
@@ -27,7 +26,6 @@ def findMatches():
     req = request.get_json()
     pattern = req['pattern']
     stringToMatch = req['stringToMatch']
-    print(pattern, stringToMatch)
     wordsToCheck = stringToMatch.split(' ')
     result = []
     for word in wordsToCheck:
@@ -46,7 +44,6 @@ def findMatches():
 
         result.append(rangeList)
 
-    print(result)
     #return the list of ranges for matches found in string
     return flask.jsonify(result = result)
 
