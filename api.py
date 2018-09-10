@@ -36,16 +36,22 @@ def findMatches():
                 if regex.regexV(pattern, word[i:x+1]):
                     longestMatch = [i, x+1]
 
-                else:
-                    if len(longestMatch) != 0:
-                        rangeList.append(longestMatch)
-                        longestMatch = []
-                        i = x+1
-
+            if len(longestMatch) != 0:
+                if checkRangeList(rangeList, longestMatch):
+                    rangeList.append(longestMatch)
+                longestMatch = []
+                i = x+1
         result.append(rangeList)
 
     #return the list of ranges for matches found in string
     return flask.jsonify(result = result)
+
+def checkRangeList(rangeList, longestMatch):
+    for range in rangeList:
+        for match in longestMatch:
+            if match >= range[0] and match <= range[1]:
+                return False
+    return True
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

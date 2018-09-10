@@ -48,9 +48,13 @@ class App extends Component {
       pattern: pattern
     })
       .then(res => {
-        if(res.data.result === false){
-          this.setState({ invalidRegMessage: 'Invalid regex pattern'})
-          console.log('herer fllase')
+        if(res.data.result.length != 0){
+          this.setState({
+              invalidRegMessage: res.data.result[0],
+              match: false,
+              matches: []
+          })
+          console.log(res.data.result[0])
         } else {
           this.setState({
             invalidRegMessage: '',
@@ -69,7 +73,8 @@ class App extends Component {
     if(this.checkForEmptyFields(pattern, stringToMatchInput) === true)
       return
 
-    this.checkLegal(pattern, stringToMatchInput)
+    if(this.checkLegal(pattern, stringToMatchInput) === false)
+      return
 
   }
 
