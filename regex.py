@@ -80,34 +80,6 @@ def handleBrackets(pattern, string, matchesNeeded):
         #only choice is to move on to next pattern char
         return regexV(pattern[matchesNeeded[1]:], string)
 
-"""
-def handleBrackets(pattern, string, matchesNeeded):
-    #checks if string chars match for the specified # of times
-    toMatch = pattern[0]
-    minMatches = matchesNeeded[0]
-    maxMatches = matchesNeeded[1]
-    if len(string) < minMatches:
-        return False
-
-    if minMatches != 0:
-        #next char must match
-        if string[0] is not toMatch:
-            return False
-        else:
-            #check next string char until minMatches == 0
-            matchesNeeded[0] -= 1
-            return handleBrackets(pattern, string[1:], matchesNeeded)
-    else:
-        if maxMatches == 0 or len(string) == 0 or string[0] is not toMatch:
-            #only choice is to move on to next pattern char
-            return regexV(pattern[matchesNeeded[2]:], string)
-        else:
-            #Subtract 1 from maxMatches, try to match again, or move on the next pattern char
-            matchesNeeded[1] -= 1
-            #if maxMatches == -1 (infinity) then it will never hit the == 0 condition
-            return regexV(pattern[matchesNeeded[2]:], string) or handleBrackets(pattern, string[1:], matchesNeeded)
-
-"""
 
 def handleParens(pattern, string, i):
     #i now equals length of string inside parens
@@ -139,13 +111,6 @@ def getRepeatNumber(pattern):
         idx += 1
 
     return int(number)
-"""
-def findMinAndMaxRepeats(pattern, offset):
-    minimumRepeats, index = checkMinRepeats(pattern, offset)
-    maximumRepeats = checkMaxRepeats(pattern, offset, index) - minimumRepeats
-    endOfBrackets = checkEndOfBrackets(pattern, offset)
-    return [minimumRepeats, maximumRepeats, endOfBrackets]
-"""
 
 def checkEndOfBrackets(pattern, offset):
     index = 3 #to include both brackets and the first char
@@ -153,36 +118,6 @@ def checkEndOfBrackets(pattern, offset):
         index += 1
         offset += 1
     return index
-"""
-def checkMaxRepeats(pattern, offset, index):
-    if pattern[index] == ',':
-        #maximum repeats is specified, could be {x,y} or {x,}
-        if pattern[index+1] == '}':
-            #set to -1 to indicate infinity repeats after minimum threshold
-            return -1
-        else:
-            #maximum number of repeats is specified within brackets
-            maxR = ''
-            index += 1
-            while pattern[index] != '}':
-                maxR += pattern[index]
-                index += 1
-            return int(maxR)
-    else:
-        return 0
-
-
-def checkMinRepeats(pattern, offset):
-    #capture whole integer in string form, and return the int form
-    minimumRepeats = pattern[offset]
-    index = offset + 1
-    while pattern[index] != ',' and pattern[index] != '}':
-        minimumRepeats += pattern[index]
-        index += 1
-
-    return (int(minimumRepeats), index)
-"""
-
 
 def checkRestOfString(cutoff, pattern, string, canItRepeat, endOfParens):
     #Will check repeats of full regex within parens (or just once if '?' is after parens)
@@ -210,37 +145,6 @@ def checkRestOfStringLimit(cutoff, pattern, string, repeats):
 
     #Entire string has been checked for parens repeats and all lead to false
     return False
-"""
-def checkRestOfStringLimit(cutoff, pattern, string, repeats):
-    #Will check if regex inside parens repeats the correct # of times (specified by repeats array)
-    minTimesToCheck = repeats[0]
-    maxTimesToCheck = repeats[1]
-    endOfBrackets = repeats[2]
-
-    for i in range(len(string)+1):
-        if regexV(pattern[:cutoff], string[:i]):
-            if minTimesToCheck-1 == 0:
-                if maxTimesToCheck == 0:
-                    #Now make sure it doesn't repeat anymore times
-                    #if not regexV(pattern, string[i:]) and regexV(pattern[cutoff+endOfBrackets:], string[i:]):
-                    if not checkRestOfString(cutoff, pattern, string[i:], True, endOfBrackets) and regexV(pattern[cutoff+endOfBrackets:], string[i:]):
-                        return True
-                elif maxTimesToCheck == -1:
-                    #This means the regex can repeat infinitely more times (so send it to checkRestOfString) or not at all
-                    return checkRestOfString(cutoff, pattern, string[i:], True, endOfBrackets) or regexV(pattern[cutoff+endOfBrackets:], string[i:])
-                else:
-                    #extra > 1, meaning it can repeat a maximum # of times
-                    #recursively check for repeats until maxTimesToCheck == 0
-                    repeats[1] -= 1
-                    return regexV(pattern[cutoff+endOfBrackets:], string[i:]) or checkRestOfStringLimit(cutoff, pattern, string[i:], repeats)
-
-            repeats[0] -= 1
-            if checkRestOfStringLimit(cutoff, pattern, string[i:], repeats):
-                return True
-
-    #Entire string has been checked for parens repeats and all lead to false
-    return False
-"""
 
 #the following is for testing purposes
 if __name__ == "__main__":

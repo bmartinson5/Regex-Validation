@@ -1,6 +1,6 @@
 import sys
 
-specialCharacters = ['*', '+', '?', '}', '{', '(']
+specialCharacters = ['*', '+', '?', '}', '{']
 
 def checkV(pattern):
     functions = [checkForStartWithChar, checkForRepeatingChar, checkForParensImbalance, checkForAfterParens, checkForBracketLegal]
@@ -61,6 +61,8 @@ def checkForAfterParens(pattern, messages):
 def checkForStartWithChar(startingChar, messages):
     #This function checks the start of the pattern for special characters (which is illegal)
     for character in specialCharacters:
+        print('char = ', character)
+        print('starting char = ', startingChar)
         if character == startingChar[0]:
             messages.append('Pattern Can\'t start with special character')
     return messages

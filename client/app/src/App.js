@@ -45,6 +45,7 @@ class App extends Component {
 
   checkLegal(pattern, string){
     axios.post('http://localhost:5000/checkLegalRegex', {
+    //axios.post('https://regex-validation-bmm-heroku.herokuapp.com/checkLegalRegex', {
       pattern: pattern
     })
       .then(res => {
@@ -80,6 +81,7 @@ class App extends Component {
 
   checkRegex(){
     axios.post('http://localhost:5000/findMatches', {
+    //axios.post('https://regex-validation-bmm-heroku.herokuapp.com/findMatches', {
       pattern: this.state.pattern,
       stringToMatch: this.state.stringToMatch
     })

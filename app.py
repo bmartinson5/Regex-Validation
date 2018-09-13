@@ -49,7 +49,7 @@ def findMatches():
 def checkRangeList(rangeList, longestMatch):
     for range in rangeList:
         for match in longestMatch:
-            if match >= range[0] and match <= range[1]:
+            if match > range[0] and match < range[1]:
                 return False
     return True
 
